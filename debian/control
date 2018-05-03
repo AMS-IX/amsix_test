@@ -1,0 +1,21 @@
+Source: libm6-app-config-perl
+Section: perl
+Priority: optional
+Maintainer: László Bogárdi <laszlo.bogardi@ams-ix.net>
+Build-Depends: debhelper (>= 8)
+Build-Depends-Indep: libyaml-appconfig-perl (>= 0.16-0),
+ libyaml-libyaml-perl (>= 0.33-1),
+ libmodern-perl-perl,
+ perl (>= 2.13),
+ perl-base (>= 1.09),
+Standards-Version: 3.9.2
+
+Package: libm6-app-config-perl
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends},
+ libyaml-appconfig-perl (>= 0.16-0),
+ libyaml-libyaml-perl (>= 0.33-1),
+ libmodern-perl-perl,
+ perl (>= 2.13),
+ perl-base (>= 1.09),
+Description: AMS-IX configuration management library

@@ -1,0 +1,30 @@
+---
+# WARNING
+# please keep in mind, that is file, is only for NL related settings
+# all the other (default) values are in DEFAULT/m6-autoprovision.yml
+# 
+# And one more thing, if you need to edit these files, please commit
+# and push them to GIT repository, otherwise they'll be overwritten
+# by a periodic puppet job!
+
+colo            : 'NL'
+domain          : 'ams-ix.net'
+
+# testing parameters
+testhost        : test.$colo.$domain
+
+# traffic statistics
+collectorhost   : chost.$colo.$domain
+
+# pxcc NL setting
+pxcc_host       : phost.$colo.$domain
+
+# colocation specific log files to check on
+logdir          : '/var/log/ams-ix'
+linkwatch       : $logdir/$colo/filtered/linkwatch.log
+logsec          : $logdir/$colo/filtered/portsec.log
+
+mails_receiver  : gloria.garciadosil@$domain
+default_mail    : test-provision@$domain
+
+testint         : not_to_be_overwritten

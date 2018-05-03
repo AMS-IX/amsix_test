@@ -1,0 +1,88 @@
+libm6-app-config-perl (0.07-2) unstable; urgency=low
+
+  * Another bug fixed, when get_all() function is used.
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Wed, 15 Jun 2016 14:52:46 +0200
+
+libm6-app-config-perl (0.07-1) unstable; urgency=low
+
+  * Test configuration has been moved under ./t/m6-app-config, so it does not
+    interfere with live configuration used from /etc/m6-app-config.
+  * Version of libyaml-libyaml-perl has been lowered, in order to be
+    compatible with squeeze
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Thu, 12 Feb 2015 11:09:46 +0200
+
+libm6-app-config-perl (0.07-0) unstable; urgency=low
+
+  * Fix issue, when reading files did not happen in the right order
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Thu, 12 Feb 2015 11:09:46 +0200
+
+libm6-app-config-perl (0.06-2) unstable; urgency=low
+
+  * debian/control: YAML::Syck has been replaced to YAML::XS, as the previous
+    one only supports YAML 1.0 specifications, pointed out by Steven.
+  * YAML::XS dependency has been added to Makefile.PL, as well.
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Thu, 12 Feb 2015 11:09:46 +0200
+
+libm6-app-config-perl (0.06-1) unstable; urgency=low
+
+  * debian/control: YAML::Syck has been added as a runtime dependency
+    Apparently, default perl YAML parser is unable to parse variables
+    defined in yml files.
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Thu, 11 Feb 2015 17:41:46 +0200
+
+libm6-app-config-perl (0.06-0) unstable; urgency=low
+
+  * new private function has been added, to read all levels of configuration
+    for a given application
+  * some refactoring will be needed as well
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Tue, 09 Feb 2015 17:39:46 +0200
+
+libm6-app-config-perl (0.05-1) unstable; urgency=low
+
+  * get_all function has been fixed, due to a bug
+  * test cases for previous function have been added
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Mon, 11 Jan 2015 17:03:46 +0200
+
+libm6-app-config-perl (0.05-0) unstable; urgency=low
+
+  * cnf/* have been completely removed.
+  * new get_all function has been created to retrieve all config keys for an
+    application.
+  * tests have been adjusted.
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Mon, 11 Jan 2015 17:03:46 +0200
+
+libm6-app-config-perl (0.04-0) unstable; urgency=low
+
+  * Changes of Steven's late code-review comments.
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Mon, 11 Jan 2015 17:03:46 +0200
+
+libm6-app-config-perl (0.03-0) unstable; urgency=low
+
+  * Changes of the code-review.
+  * Missing documentation has been added.
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Thu, 21 Dec 2015 11:42:46 +0200
+
+libm6-app-config-perl (0.02-0) unstable; urgency=low
+
+  * Initial features are implemented:
+    - init application related config
+    - get config key from application level config
+    - get falls back, when config key is not found on application level
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Thu, 11 Dec 2015 15:15:46 +0200
+
+libm6-app-config-perl (0.01-0) unstable; urgency=low
+
+  * Initial build.
+
+ -- Laszlo Bogardi <laszlo.bogardi@ams-ix.net>  Thu, 03 Dec 2015 15:33:46 +0200

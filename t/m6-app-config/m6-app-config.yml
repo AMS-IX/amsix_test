@@ -1,0 +1,6 @@
+---
+app              : m6-app-config
+config_extension : yml
+config_directory : './t/m6-app-config'
+default_config   : default.yml
+fallback_order   : [ default, site-default, site ]

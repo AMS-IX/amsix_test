@@ -1,0 +1,4 @@
+---
+sudo_most_default : /usr/bin/sudo_most_def
+foo               : most_default_bar
+

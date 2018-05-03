@@ -1,0 +1,7 @@
+MANIFEST
+MANIFEST.SKIP
+Makefile.PL
+Copying
+Changelog
+README
+lib/M6/App/Config.pm

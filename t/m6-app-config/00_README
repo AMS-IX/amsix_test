@@ -1,0 +1,7 @@
+Structure of this directory is exactly the same to the one in another
+repository at:
+ 
+ https://<username>@bitbucket.ams-ix.net/scm/map/m6-configuration-store.git
+
+however, this configuration files don't get spread anywhere, they're only for
+testing purposes of the library.
