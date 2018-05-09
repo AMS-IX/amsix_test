@@ -1,4 +1,4 @@
-#DESCRIPTION
+# DESCRIPTION
 
 The M6::App::Config class aims at centralising configuration values using a hierarchical set of YAML files, thereby closely resembling Hiera.
 
@@ -8,11 +8,11 @@ The module works with a global configuration file (/etc/m6-app-config/m6-app-con
 
 Variable interpolation in values is supported through YAML::AppConfig(3).
 
-#SEE ALSO
+# SEE ALSO
 
 Hiera https://docs.puppet.com/hiera/
 
-#TASKS
+# TASKS
 
 The folder structure of the configuration files is as follows:
 - parent_directory
