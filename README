@@ -16,10 +16,10 @@ TASK
 
 The folder structure is as follows:
 - parent_directory
--- One DEFAULT folder
-        --- Several .yaml files inside default folder
--- One folder per amsix exchange (one for Netherlands, one for NewYork, etc)
-        --- Several .yaml files inside each folder
+- One DEFAULT folder
+- Several .yaml files inside default folder
+- One folder per amsix exchange (one for Netherlands, one for NewYork, etc)
+- Several .yaml files inside each folder
         
 When the same variable is defined in DEFAULT folder, and in one of the site specific folders (for example NL), the most specific variable (NL) must prevale, overriding the DEFAULT one.
 Your task here is to complete the following:
