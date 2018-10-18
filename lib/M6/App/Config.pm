@@ -107,11 +107,10 @@ More details description can be found in the description for each subroutine.
 =cut
 
 use Modern::Perl;
-use strictures 2;
-use Carp qw/confess/;
-use Data::Dumper;
-use Moo;
 use YAML::AppConfig;
+use Carp qw/confess/;
+use Moo;
+use strictures 2;
 use namespace::clean;
 
 our $VERSION      = '0.08';

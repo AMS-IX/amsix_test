@@ -16,5 +16,9 @@ WriteMakefile(
     PREREQ_PM           => {
         'YAML::AppConfig'    => '0.16',
         'YAML::XS'           => '0.33',
+        'Moo'                => '2.002005',
+        'namespace::clean'   => '0.27',
+        'Test::Pod'          => '1.51',
+        'Test::Spec'         => '0.51',
     },
 );
