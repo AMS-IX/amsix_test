@@ -10,8 +10,8 @@ Build-Depends-Indep: libyaml-appconfig-perl (>= 0.16-0), libyaml-libyaml-perl (>
 Package-List:
  libm6-app-config-perl deb perl optional arch=all
 Checksums-Sha1:
- 9b88cd877e7afd03ccd2bcf6faeed98a9efdde25 9258 libm6-app-config-perl_0.08.tar.gz
+ 010ab8349381632485d213d81ea83aae9e8fabb8 9287 libm6-app-config-perl_0.08.tar.gz
 Checksums-Sha256:
- 8b3d71285e2d78c664bdae3137a71e0ca802498f481cb4d5028fe77d9685a9c4 9258 libm6-app-config-perl_0.08.tar.gz
+ 34aaf3bf52be6e11818faf60df44cc33e47b560bdbccb742aa5cd5c01ebaa660 9287 libm6-app-config-perl_0.08.tar.gz
 Files:
- a4ee1f16f9b1bae8a11ebdc418f9431c 9258 libm6-app-config-perl_0.08.tar.gz
+ 6f753e1365be3cca4f073f209128fb20 9287 libm6-app-config-perl_0.08.tar.gz
