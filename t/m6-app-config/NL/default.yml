@@ -5,3 +5,5 @@ sudo         : '/usr/bin/sudo'
 ndisc_header : '/usr/bin/ndisc6'
 ping_header  : $sudo /bin/ping
 
+site_app: site_default
+site_default: site_default

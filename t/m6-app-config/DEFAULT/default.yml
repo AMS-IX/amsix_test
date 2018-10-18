@@ -1,3 +1,7 @@
 ---
 sudo_default : /usr/bin/sudo_def
 
+site_app: default_default
+site_default: default_default
+default_app: default_default
+default_default: default_default

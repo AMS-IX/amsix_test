@@ -1,4 +1,0 @@
----
-sudo_default : /usr/bin/sudo_def
-foo : default_bar
-

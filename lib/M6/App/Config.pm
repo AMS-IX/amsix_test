@@ -1,196 +1,6 @@
 package M6::App::Config;
-use Modern::Perl;
-use YAML::AppConfig;
 
-###############################################################################
-# global variables
-###############################################################################
-
-our $VERSION  = '0.07';
-our $NAME     = 'm6-app-config';
-our $DEF_SITE = 'DEFAULT';
-our $YAML_LIB = 'YAML::XS';
-our $CONFIG   = "/etc/$NAME/$NAME.yml";
-
-###############################################################################
-# public functions
-###############################################################################
-
-sub new {
-    my ( $class, $app, $site ) = @_;
-    my $self = bless {}, $class;
-
-    $self->_init( $app, $site );
-
-    return $self;
-}
-
-sub get {
-    my ( $self, $key ) = @_;
-    my $app            = $self->{app};
-    my $keys           = $self->_get_app_conf_keys();
-
-    # look up the key
-    if ( grep { $key eq $_ } @$keys ) {
-        return $self->{$app}->get( $key );
-
-    # merge the next yaml document, and try again
-    } elsif ( ! $self->{fb_done} ) {
-        my $file = $self->_select_yml_file();
-
-        # merge the next yaml file content
-        $self->{$app}->merge( file => $file );
-
-        # finally invoke ourselves again
-        $self->get( $key );
-
-    } else {
-        die "Config key: $key cannot be found!";
-    }
-}
-
-sub get_all {
-    my ( $class, $app, $site ) = @_;
-
-    my $obj = M6::App::Config->new( $app, $site );
-       $obj->_get_all_app_conf_keys( $app );
-
-    my %config = map { $_ => $obj->get($_) } @{ $obj->_get_app_conf_keys };
-    
-    # depending on context, lets return a hash or its reference
-    return wantarray ? %config : \%config;
-}
-
-# TODO:
-# please comment during the code review, if we need a function to
-# write the config files, too
-
-sub put {
-    my ( $self, $key ) = @_;
-}
-
-###############################################################################
-# private functions
-###############################################################################
-
-sub _get_app_conf_keys {
-    my ( $self ) = @_;
-    my $application = $self->{app};
-
-    return [ $self->{ $application }->config_keys() ];
-}
-
-sub _get_all_app_conf_keys {
-    my ( $self ) = @_; 
-    my $config_dir   = $self->{config}->get('config_directory');
-    my $extension    = $self->{config}->get('config_extension');
-    my $default_file = $self->{config}->get('default_config');
-    my $app          = $self->{app};
-    my $site         = $self->{site};
-    my @files        = ();
-
-    push @files, 
-        ( "$config_dir/$DEF_SITE/$app.$extension", 
-          "$config_dir/$DEF_SITE/$default_file" )
-     if ( $site ne $DEF_SITE );
-
-    push @files, ( "$config_dir/$default_file",
-                   "$config_dir/$site/$default_file",
-                   "$config_dir/$site/$app.$extension" );
-   
-    foreach ( @files ){
-        ( -e $_ ) ? $self->{$app}->merge( file => $_ )
-                  : next;
-    }
-}
-
-sub _init {
-    my ( $self, $app, $site ) = @_;
-
-    # initializing internal variables
-    $self->_fallback_init();
-
-    $self->{app}    = $app;
-    $self->{site}   = uc ( $site // $DEF_SITE );
-    $self->{config} = YAML::AppConfig->new( file       => _get_config_dir(),
-                                            yaml_class => $YAML_LIB );
-
-    $self->_read_application_config( $app );
-}
-
-sub _set_config_dir {
-    my ( $self, $dir ) = @_;
-    $CONFIG = $dir;
-}
-
-sub _get_config_dir {
-    return $CONFIG;
-}
-
-sub _read_application_config {
-    my ( $self, $app ) = @_;
-
-    my $cnf         = $self->{config};
-    my $site        = $self->{site};
-    my $config_dir  = $cnf->get('config_directory');
-    my $extension   = $cnf->get('config_extension');
-
-    my $config_file = "$config_dir/$site/$app.$extension";
-
-    die "Configuration file: $config_file does not exist!"
-     if ( ! -e $config_file  );
-
-    $self->{$app} = YAML::AppConfig->new( file       => $config_file,
-                                          yaml_class => $YAML_LIB );
-}
-
-sub _select_yml_file {
-    my ( $self ) = @_;
-
-    my $cnf          = $self->{config};
-    my $app          = $self->{app};
-    my $config_dir   = $cnf->get('config_directory');
-    my $extension    = $cnf->get('config_extension');
-    my $default_file = $cnf->get('default_config');
-    my $site         = $self->{site};
-    my $state        = $self->_fallback_state();
-    my $config_file  = undef;
-
-    if ( $state eq 'site' ){
-       $config_file = "$config_dir/$site/$app.$extension";
-       $self->_fallback_done();   
-    } elsif ( $state eq 'site-default' ){
-       $config_file = "$config_dir/$site/$default_file";
-
-    } else { # must be the default case 
-       $config_file = "$config_dir/$default_file";
-    }
-
-    return $config_file;
-}
-
-sub _fallback_init {
-    my $self = shift;
-    $self->{fallback} = 0;
-    $self->{fb_done}  = 0;
-}
-
-sub _fallback_done {
-    my $self = shift;
-    $self->{fb_done} = 1;
-}
-
-sub _fallback_state {
-    my ( $self )  = @_;
-    my $cnf       = $self->{config};
-    my @fallbacks = @{$cnf->get_fallback_order()};
-
-    # uncoverable branch false
-    return $fallbacks[ $self->{fallback}++ ]
-     if $self->{fallback} <= $#fallbacks;
-}
-
-1;
+=encoding utf-8
 
 =head1 NAME
 
@@ -198,17 +8,19 @@ M6::App::Config - hierarchical, centralised configurations for Perl
 
 =head1 SYNOPSIS
 
- use M6::App::Config;
-   
- # initialization of the configuration class for a specific application
- # on a specific site ( DEFAULT, when it's not specified explicitly )
- my $cnf = M6::App::Config->new( 'm6-autoprovision', 'NL' );
+    use M6::App::Config;
 
-    # get a value of a config key:
-    $cnf->get( 'ping_header' );
+    # Read a configuration for application 'm6-autoprovision'
+    my $cfg = M6::App::Config->new( 'm6-autoprovision', 'NL' );
 
-    # or a nice syntactic sugar:
-    $cnf->get_ping_header;
+    # Get a value of a configuration key
+    my $ping_header = $cfg->get( 'ping_header' );
+
+    # Same thing but with nice syntactic sugar
+    $ping_header = $cfg->get_ping_header;
+
+    # Get all configuration (as a HASHREF) for specified application and site
+    my $config = M6::App::Config->get_all( 'm6-autoprovision', 'NL' );
 
 =head1 DESCRIPTION
 
@@ -217,114 +29,450 @@ used by AMS-IX's platform software (provisioning, monitoring, etc.).
 
 =head1 CONFIGURATION
 
+=head2 Main configuration
+
+This module expects main configuration file. Default path for this file is
+C</etc/m6-app-config/m6-app-config.yml>. You can change that path by using
+C<main_config_file> parametr in constructor.
+
+In main configuration file expeted next variables:
+
+=over
+
+=item config_extension
+
+Extension for all application configuration files.
+
+=item config_directory
+
+Directory containing call configuration files.
+
+=item default_config
+
+File name (without extension) of default configuration files.
+Default configuration files can exists in root of C<config_directory>, in
+site default folder and in site folder. Default configuration files readed
+before application configuration files.
+
+=item fallback_order
+
+Order in wich configuration files are readed. Default order is
+C<default, site-default, site>.
+
+If list of configuration files looks like this:
+
+    DEFAULT/default.yml
+    DEFAULT/some-app.yml
+    NL/default.yml
+    NL/some-app.yml
+    default.yml
+
+Then with default fallback_order this module will read files in this order:
+
+    1. default.yml
+    2. DEFAULT/default.yml
+    4. DEFAULT/some-app.yml
+    5. NL/default.yml
+    6. NL/some-app.yml
+
+If fallback_order is C<site-default, default, site>, then order of reading
+configuration files will be this:
+
+    1. DEFAULT/default.yml
+    2. DEFAULT/some-app.yml
+    3. default.yml
+    4. NL/default.yml
+    5. NL/some-app.yml
+
+=back
+
+=head2 Application configuration
+
+All applications configuration file should be placed in specified order.
+For example for application C<some-app> we should create atleas one of this
+files:
+
+    DEFAULT/default.yml
+    DEFAULT/some-app.yml
+    NL/default.yml
+    NL/some-app.yml
+    default.yml
+
+Or all of them. Order of reading this files specified by C<fallback_order> (read
+about C<fallback_order> in paragraph "Main configuration").
+
 This module expects several variables defined in F<m6-app-config.yml>
 More details description can be found in the description for each subroutine.
 
+=cut
+
+use Modern::Perl;
+use strictures 2;
+use Carp qw/confess/;
+use Data::Dumper;
+use Moo;
+use YAML::AppConfig;
+use namespace::clean;
+
+our $VERSION      = '0.08';
+our $DEFAULT_SITE = 'DEFAULT';
+
 =head1 CONSTRUCTOR
 
-=over
+=head2 new
 
-=item B<new> ( I<APP>, I<SITE> )
-X<new> invokes private method X<_init>, then returns a new C<M6::App::Config> 
-object.
-I<APP>: Application name as it is configured in m6-app-config.yml. eg.: 'm6-autoprovision'
-I<SITE>: Site name of the exchange. eg.: 'NL', 'CHI', etc.
-
-=back
-
-=head1 METHODS
+    M6::App::Config->new(
+        $app,
+        $site,
+        $main_config_file,
+        $yaml_lib,
+    );
 
 =over
 
-=item B<get> ( I<KEY> )
-X<get> provides access to config files for querying existing keys. When the
-searched key cannot be found in the first place, it falls back to a wider level.
-First, it makes a list of existing keys from the application related config 
-file. It greps through this list for the searched I<KEY>, and immediately returns with the value, if it exists.
-When I<KEY> does not exist, it falls back to the next configuration level, 
-merges the config file, and invokes B<get> again. It falls back recursively
-to the widest config level or until I<KEY> is found. If I<KEY> cannot be found,
-it dies with an error message.
+=item C<$app>
 
-I<KEY>: name of the searched key. eg.: 'ping_header'.
+Name of application, wich configuration we are going to read.
 
-=item B<get_all> ( I<APP>, I<SITE> )
-X<get_all> is a wrapper function around B<_init> and B<_get_all_conf_keys>.
-It does exectly two things: invokes the constructor of C<M6::App::Config> class,
-then reads all the configuration keys and values from the first level C<YAML> 
-file.
-Finally, it returns either a hash or its reference, depending on the context,
-the function was invoked.
+Required atribute.
 
-=item B<put> ( I<KEY>, I<VAL> )
-X<put>
+=item C<$site>
 
-To be implemented.
-I<KEY>: name of the config key to be written.
-I<VAL>: value of the key to be written.
+Site name of exchange (eg. NL, CHI, etc.).
 
-=back
+Default site is 'DEFAULT'.
 
-=head2 Private Methods
+Can be overwriten in main configuration file.
 
-You probably should not call these outside of the module. Actually, you
-are not even able to call these methods, because they are not exported.
+=item C<$main_config_file>
 
-=over
+Path to main config file.
 
-=item B<_init> ( I<APP>, I<SITE> )
-X<_init> is a private method, used to initialize the inner structure of a 
-C<M6::App::Config> object. 
+Default path is '/etc/m6-app-config/m6-app-config.yml'.
 
-=item B<_read_application_config> ( I<APP> )
-X<_read_application_config> is a private method, used to read and parse
-an application level config file. It dies when referred config file does
-not exist. Otherwise, it uses C<YAML::AppConfig> package to parse a config
-file.
+=item C<$yaml_lib>
 
-It expects the following variables in F<m6-app-config.yml>:
-C<config_directory>: path to the main level configuration files
-C<config_extension>: extension of config files, eg.: 'yml'
+Lib that should be used for parsing YAML files.
 
-I<APP>: Application name as it is configured in F<m6-app-config.yml>. eg.: 'm6-autoprovision'
-
-=item B<_get_app_conf_keys>
-X<_get_app_conf_keys> is wrapper method around the method 'config_keys' of 
-C<YAML::AppConfig>. It returns an array reference of existing keys of an
-application.
-It does not expect any config variables from F<m6-app-config.yml>
-
-=item B<_fallback_init>
-X<_fallback_init> is used to initialize inner state variables.
-
-=item B<_fallback_done>
-X<_fallback_done> is to set an inner state variable, to mark
-when fallback is finished, and the widest config level has been reached. 
-
-=item B<_fallback_state>
-X<_fallback_state> is to decide if we need to fall back to a wider config level.
-It uses C<fallback_order> config variable from F<m6-app-config.yml>.
-When fallback has not been finished yet, it returns the next level, as it is
-configured by C<fallback_order>. Otherwise, it returns 0.
-
-=item B<_select_yml_file>
-X<_select_yml_files> is to decide which config file to read, based on the
-actual fallback state, given by B<fallback_state>.
-
-It expects three variables configured in F<m6-app-config.yml>:
-C<config_directory>: path to the main level configuration files
-C<config_extension>: extension of config files, eg.: 'yml'
-C<default_config>: it identifies the widest config file, eg.: 'default.yml'
+Default is 'YAML::XS'.
 
 =back
+
+=cut
+
+has app => (
+    is       => 'ro',
+    required => 1,
+    isa      => sub { confess 'should not be empty' if !$_[0] },
+);
+
+has site => (
+    is  => 'ro',
+    isa => sub { confess 'should not be empty' if !$_[0] },
+);
+
+has main_config_file => (
+    is      => 'ro',
+    default => sub { '/etc/m6-app-config/m6-app-config.yml' },
+    isa     => sub { confess "'$_[0]' does not exists" if !-e $_[0] },
+);
+
+has yaml_lib => (
+    is      => 'ro',
+    default => sub { 'YAML::XS' },
+    isa     => sub {
+        my $class = $_[0];
+
+        confess 'should not be empty' if !$class;
+
+        # Check that we can load module
+        eval "
+            require YAML::Syck;
+            1;
+        " or do {
+            confess "can't load yaml lib '$class' with error: $@";
+        };
+    },
+);
+
+=head1 PUBLIC METHODS
+
+=head2 get
+
+    $cfg->get('logdir');
+
+Return value for key.
+If there is no such key - dies with error.
+
+=head2 get_*
+
+    $cfg->get_logdir;
+
+Syncax shugar around C<get>.
+Return value for key (key is a part of method name).
+If there is no such key - dies with error.
+
+=cut
+
+sub get {
+    my ( $self, $key ) = @_;
+
+    my $val = $self->_app_config->get( $key )
+        or confess "config key '$key' not found";
+
+    return $val;
+}
+
+=head2 get_all
+
+Return value for key.
+If there is no such key - dies with error.
+
+=cut
+
+sub get_all {
+    my ( $class, @params ) = @_;
+
+    my $cfg = $class->new( @params );
+
+    my $app_config = $cfg->_app_config->config;
+
+    return wantarray ? %$app_config : $app_config;
+}
+
+=head1 PRIVAT METHODS
+
+=cut
+
+has _config_extension => (
+    is      => 'rwp',
+    default => sub { 'yml' },
+    isa     => sub { confess 'should not be empty' if !$_[0] },
+);
+
+has _config_directory => (
+    is      => 'rwp',
+    default => sub { 'yml' },
+    isa     => sub { confess 'should not be empty' if !$_[0] },
+);
+
+has _default_config => (
+    is      => 'rwp',
+    default => sub { 'default' },
+    isa     => sub { confess 'should not be empty' if !$_[0] },
+);
+
+has _fallback_order => (
+    is      => 'rwp',
+    default => sub { [qw/default site-default site/] },
+);
+
+has _app_config => (
+    is => 'rwp',
+);
+
+=head2 BUILDARGS
+
+Convert positional params of constructor to HASHREF required by Moo.
+
+=cut
+
+sub BUILDARGS {
+    my ( $self, $app, $site, $main_config_file, $yaml_lib ) = @_;
+
+    my $args = {};
+
+    $args->{app} = $app
+        if defined $app;
+
+    $args->{site} = $site
+        if defined $site;
+
+    $args->{main_config_file} = $main_config_file
+        if defined $main_config_file;
+
+    $args->{yaml_lib} = $yaml_lib
+        if defined $yaml_lib;
+
+    return $args;
+}
+
+=head2 BUILD
+
+Read main and application configurations and create accessors
+to configuration's keys.
+
+=cut
+
+sub BUILD {
+    my ( $self, $args ) = @_;
+
+    $self->_read_main_config;
+
+    $self->_read_app_config;
+
+    $self->_make_accessors_to_config_keys;
+}
+
+=head2 _read_main_config
+
+Read main configuration and use variables from it to set object property.
+
+=cut
+
+sub _read_main_config {
+    my ( $self ) = @_;
+
+    # read main configuration
+    my $main_config = YAML::AppConfig->new(
+        file       => $self->main_config_file,
+        yaml_class => $self->yaml_lib,
+    );
+
+    # use variables from config to set object property
+    my @main_config_keys = qw/
+        config_extension
+        config_directory
+        default_config
+        fallback_order
+    /;
+
+    for my $main_config_key ( @main_config_keys ) {
+        my $setter_name = "_set__$main_config_key";
+        $self->$setter_name( $main_config->get( $main_config_key ) );
+    }
+}
+
+=head2 _read_app_config
+
+Read all application configuration files, and create C<YAML::AppConfig> object
+from them for futher usage.
+
+=cut
+
+sub _read_app_config {
+    my ( $self ) = @_;
+
+    my $cfg = YAML::AppConfig->new(
+        yaml_class => $self->yaml_lib,
+    );
+
+    for my $file ( $self->_build_paths_to_app_config_files ) {
+        $cfg->merge( file => $file );
+    }
+
+    $self->_set__app_config( $cfg );
+}
+
+=head2 _build_paths_to_app_config_files
+
+Return paths to all needed and exists configuraion files. Order of files defined by
+C<falback_order>.
+
+=cut
+
+sub _build_paths_to_app_config_files {
+    my ( $self ) = @_;
+
+    my @possible_files;
+
+    my $use_default_site = $self->site ? 0 : 1;
+
+    # use fallback_order to defined in what order should we read config files
+    for my $fallback_type ( @{$self->_fallback_order} ) {
+        if ( $fallback_type eq 'default' ) {
+            my $config_file =
+                $self->_config_directory
+                . '/'
+                . $self->_default_config
+                . '.'
+                . $self->_config_extension;
+
+            push @possible_files, $config_file,
+        }
+        elsif (
+            $fallback_type eq 'site-default'
+            || $fallback_type eq 'site'
+        ) {
+            my $is_site_fallback = $fallback_type eq 'site';
+
+            # skip site config if we are using default sit
+            next
+                if $is_site_fallback
+                && $use_default_site;
+
+            my $config_files_dir =
+                $self->_config_directory
+                . '/'
+                . ( $is_site_fallback ? $self->site : $DEFAULT_SITE )
+                . '/';
+            my $default_file_in_dir =
+                $config_files_dir
+                . $self->_default_config
+                . '.'
+                . $self->_config_extension;
+            my $app_config_file_in_dir =
+                $config_files_dir
+                . $self->app
+                . '.'
+                . $self->_config_extension;
+
+            # Application config should exists. If we use default site
+            # then it should exists in default site dir. If we use not default
+            # site then it should exists in site dir. Die if it not exists.
+            if (
+                (
+                    $is_site_fallback && !$use_default_site
+                    || !$is_site_fallback && $use_default_site
+                )
+                && !-e $app_config_file_in_dir
+            ) {
+                confess "'$app_config_file_in_dir' not found";
+            }
+
+            push @possible_files,
+                $default_file_in_dir,
+                $app_config_file_in_dir;
+        }
+        else {
+            confess "unsupported fallback type '$fallback_type'";
+        }
+    }
+
+    # keep only files that really exists
+    my @files = grep { -e $_ } @possible_files;
+
+    return @files;
+}
+
+=head2 _make_accessors_to_config_keys
+
+Make accessors to configuration keys.
+
+=cut
+
+sub _make_accessors_to_config_keys {
+    my ( $self ) = @_;
+
+    for my $key ($self->_app_config->config_keys) {
+        next
+            if !$key
+            || $key !~ /^[a-zA-Z_]\w*$/;
+
+        no strict 'refs';
+        no warnings 'redefine';
+        my $method_name = ref($self) . "::get_$key";
+        *{$method_name} = sub { $_[0]->_app_config->get($key, $_[1]) };
+    }
+}
 
 =head1 VERSION
 
-Version 0.05
+Version 0.08
 
 =head1 AUTHOR
 
-Laszlo Bogardi, C<< <laszlo at ams-ix.net> >>
+Laszlo Bogardi, <<laszlo.bogardi@ams-ix.net>>
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -332,3 +480,4 @@ Copyright 2015 Amsterdam Internet Exchange.
 
 =cut
 
+1;
