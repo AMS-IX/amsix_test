@@ -31,9 +31,9 @@ used by AMS-IX's platform software (provisioning, monitoring, etc.).
 
 =head2 Main configuration
 
-This module expects main configuration file. Default path for this file is
-C</etc/m6-app-config/m6-app-config.yml>. You can change that path by using
-C<main_config_file> parametr in constructor.
+This module expects the main configuration file. The default path for this file
+is C</etc/m6-app-config/m6-app-config.yml>. You can change that path by using
+C<main_config_file> parameter in constructor.
 
 In main configuration file expeted next variables:
 
@@ -49,17 +49,17 @@ Directory containing call configuration files.
 
 =item default_config
 
-File name (without extension) of default configuration files.
-Default configuration files can exists in root of C<config_directory>, in
-site default folder and in site folder. Default configuration files readed
-before application configuration files.
+Filename (without extension) of default configuration files.
+Default configuration files can exist in the root of C<config_directory>, in
+site default folder and in the site folder. Default configuration files are
+read before application configuration files.
 
 =item fallback_order
 
-Order in wich configuration files are readed. Default order is
+Order in which configuration files are read. Default order is
 C<default, site-default, site>.
 
-If list of configuration files looks like this:
+If a list of configuration files looks like this:
 
     DEFAULT/default.yml
     DEFAULT/some-app.yml
@@ -67,7 +67,7 @@ If list of configuration files looks like this:
     NL/some-app.yml
     default.yml
 
-Then with default fallback_order this module will read files in this order:
+then with default fallback_order this module will read files in this order:
 
     1. default.yml
     2. DEFAULT/default.yml
@@ -75,7 +75,7 @@ Then with default fallback_order this module will read files in this order:
     5. NL/default.yml
     6. NL/some-app.yml
 
-If fallback_order is C<site-default, default, site>, then order of reading
+If fallback_order is C<site-default, default, site>, then an order of reading
 configuration files will be this:
 
     1. DEFAULT/default.yml
@@ -88,8 +88,8 @@ configuration files will be this:
 
 =head2 Application configuration
 
-All applications configuration file should be placed in specified order.
-For example for application C<some-app> we should create atleas one of this
+All applications configuration file should be placed in a specified order.
+For example for application C<some-app> we should create at least one of this
 files:
 
     DEFAULT/default.yml
@@ -131,9 +131,9 @@ our $DEFAULT_SITE = 'DEFAULT';
 
 =item C<$app>
 
-Name of application, wich configuration we are going to read.
+Name of application, which configuration we are going to read.
 
-Required atribute.
+Required attribute.
 
 =item C<$site>
 
@@ -141,19 +141,17 @@ Site name of exchange (eg. NL, CHI, etc.).
 
 Default site is 'DEFAULT'.
 
-Can be overwriten in main configuration file.
-
 =item C<$main_config_file>
 
-Path to main config file.
+A path to main config file.
 
-Default path is '/etc/m6-app-config/m6-app-config.yml'.
+The default path is '/etc/m6-app-config/m6-app-config.yml'.
 
 =item C<$yaml_lib>
 
 Lib that should be used for parsing YAML files.
 
-Default is 'YAML::XS'.
+The default is 'YAML::XS'.
 
 =back
 
@@ -200,16 +198,17 @@ has yaml_lib => (
 
     $cfg->get('logdir');
 
-Return value for key.
-If there is no such key - dies with error.
+It returns value for a key.
+If there is no such key - dies with an error.
+
 
 =head2 get_*
 
     $cfg->get_logdir;
 
-Syncax shugar around C<get>.
-Return value for key (key is a part of method name).
-If there is no such key - dies with error.
+Syntax sugar around C<get>.
+Returns value for a key (the key is a part of method name).
+If there is no such key - dies with an error.
 
 =cut
 
@@ -224,8 +223,8 @@ sub get {
 
 =head2 get_all
 
-Return value for key.
-If there is no such key - dies with error.
+Returns all values for applications.
+Parameters are the same as for constructor.
 
 =cut
 
@@ -272,7 +271,7 @@ has _app_config => (
 
 =head2 BUILDARGS
 
-Convert positional params of constructor to HASHREF required by Moo.
+Convert positional params of a constructor to HASHREF required by Moo.
 
 =cut
 
@@ -315,14 +314,14 @@ sub BUILD {
 
 =head2 _read_main_config
 
-Read main configuration and use variables from it to set object property.
+Read the main configuration and use variables from it to set object property.
 
 =cut
 
 sub _read_main_config {
     my ( $self ) = @_;
 
-    # read main configuration
+    # read the main configuration
     my $main_config = YAML::AppConfig->new(
         file       => $self->main_config_file,
         yaml_class => $self->yaml_lib,
@@ -345,7 +344,7 @@ sub _read_main_config {
 =head2 _read_app_config
 
 Read all application configuration files, and create C<YAML::AppConfig> object
-from them for futher usage.
+from them for further usage.
 
 =cut
 
@@ -365,8 +364,8 @@ sub _read_app_config {
 
 =head2 _build_paths_to_app_config_files
 
-Return paths to all needed and exists configuraion files. Order of files defined by
-C<falback_order>.
+Return paths to all needed and existing configuration files.
+Order of files defined by C<falback_order>.
 
 =cut
 
@@ -377,7 +376,7 @@ sub _build_paths_to_app_config_files {
 
     my $use_default_site = $self->site ? 0 : 1;
 
-    # use fallback_order to defined in what order should we read config files
+    # use fallback_order to define in what order should we read config files
     for my $fallback_type ( @{$self->_fallback_order} ) {
         if ( $fallback_type eq 'default' ) {
             my $config_file =
@@ -416,9 +415,9 @@ sub _build_paths_to_app_config_files {
                 . '.'
                 . $self->_config_extension;
 
-            # Application config should exists. If we use default site
-            # then it should exists in default site dir. If we use not default
-            # site then it should exists in site dir. Die if it not exists.
+            # Application config should exist. If we use the default site
+            # then it should exist in default site dir. If we use not default
+            # site then it should exist in site dir. Die if it not exists.
             if (
                 (
                     $is_site_fallback && !$use_default_site
