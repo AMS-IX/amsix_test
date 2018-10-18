@@ -1,3 +1,9 @@
+libm6-app-config-perl (0.08) unstable; urgency=low
+
+  * Refactoring to make it more OO with Moo.
+
+ -- Stanislav Glushanin <s.glushanin@gmail.com>  Wed, 18 Oct 2018 16:16:00 +1000
+
 libm6-app-config-perl (0.07-2) unstable; urgency=low
 
   * Another bug fixed, when get_all() function is used.
