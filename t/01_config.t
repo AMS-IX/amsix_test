@@ -2,6 +2,7 @@
 
 use Test::Spec;
 use Test::Exception;
+
 use M6::App::Config;
 
 my $app         ='m6-autoprovision';
